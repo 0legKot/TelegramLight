@@ -7,6 +7,17 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <RichTextBox x:Name="rtbMain" HorizontalAlignment="Left" Height="400" Margin="10,10,0,0" VerticalAlignment="Top" Width="388">
+            <FlowDocument>
+                <Paragraph>
+                    
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
+        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Height="32" Margin="510,249,0,0" VerticalAlignment="Top" Width="132" Click="btnStart_Click"/>
+        <TextBox x:Name="TbPhone" HorizontalAlignment="Left" Height="23" Margin="468,51,0,0" TextWrapping="Wrap" Text="+" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnSend" Content="Send code" HorizontalAlignment="Left" Height="32" Margin="510,173,0,0" VerticalAlignment="Top" Width="132" Click="btnSend_Click" />
+        <TextBox x:Name="TbCode" HorizontalAlignment="Left" Height="23" Margin="468,102,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+
     </Grid>
 </Window>
