@@ -23,11 +23,11 @@ namespace TelegramLight
     /// </summary>
     public partial class MainWindow : Window
     {
-        const int apiId = 0;
-        const string apiHash = "";
+        private static readonly int apiId = int.Parse(Properties.Resources.API_ID);
+        private static readonly string apiHash = Properties.Resources.API_HASH;
         string hash = "";
         string code = "";
-        static readonly TelegramClient client= new TelegramClient(apiId, apiHash);
+        private static readonly TelegramClient client = new TelegramClient(apiId, apiHash);
         public MainWindow()
         {
             InitializeComponent();
@@ -36,23 +36,30 @@ namespace TelegramLight
 
         private async void btnStart_Click(object sender, RoutedEventArgs e)
         {
-            
 
-            TLUser user = await client.MakeAuthAsync(TbPhone.Text, hash, TbCode.Text);
-            
+            if (!client.IsUserAuthorized())
+            {
+                TLUser user = await client.MakeAuthAsync(TbPhone.Text, hash, TbCode.Text);
+            }
+            else
+            {
+                await client.ConnectAsync();
+            }
+
+
             if (client.IsUserAuthorized())
             {
                 //get available contacts
                 var result = await client.GetContactsAsync();
-                rtbMain.AppendText(result.Contacts.Count.ToString()+"\n");
+                rtbMain.AppendText(result.Contacts.Count.ToString() + "\n");
                 foreach (var item in result.Users.OfType<TLUser>())
                 {
-                    rtbMain.AppendText(item.Username+"\n");
+                    rtbMain.AppendText(item.Username + "\n");
                 }
-                var kostya = result.Users
-                    .OfType<TLUser>()
-                    .FirstOrDefault(x => x.Username == "KostyaNes");
-                await client.SendMessageAsync(new TLInputPeerUser() { UserId = kostya.Id }, "Hello from my stupid telegram app");
+                //var kostya = result.Users
+                //    .OfType<TLUser>()
+                //    .FirstOrDefault(x => x.Username == "KostyaNes");
+                //await client.SendMessageAsync(new TLInputPeerUser() { UserId = kostya.Id }, "Hello from my stupid telegram app");
             }
         }
 
