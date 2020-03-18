@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TeleSharp.TL;
+using TeleSharp.TL.Messages;
 using TLSharp.Core;
 
 namespace TelegramLight
@@ -26,7 +28,6 @@ namespace TelegramLight
         private static readonly int apiId = int.Parse(Properties.Resources.API_ID);
         private static readonly string apiHash = Properties.Resources.API_HASH;
         string hash = "";
-        string code = "";
         private static readonly TelegramClient client = new TelegramClient(apiId, apiHash);
         public MainWindow()
         {
@@ -49,17 +50,24 @@ namespace TelegramLight
 
             if (client.IsUserAuthorized())
             {
-                //get available contacts
-                var result = await client.GetContactsAsync();
-                rtbMain.AppendText(result.Contacts.Count.ToString() + "\n");
-                foreach (var item in result.Users.OfType<TLUser>())
+                
+                var dialogs = (TLDialogsSlice)await client.GetUserDialogsAsync(limit: 30);
+                foreach (var item in dialogs.Chats.OfType<TLChannel>())
                 {
-                    rtbMain.AppendText(item.Username + "\n");
+
+                    lbGroupChats.Items.Add(new GroupView( item));
                 }
-                //var kostya = result.Users
-                //    .OfType<TLUser>()
-                //    .FirstOrDefault(x => x.Username == "KostyaNes");
-                //await client.SendMessageAsync(new TLInputPeerUser() { UserId = kostya.Id }, "Hello from my stupid telegram app");
+                foreach (var item in dialogs.Dialogs)
+                {
+                    var peer = item.Peer as TLPeerUser;
+                    if (peer != null)
+                    {
+                        var user = dialogs.Users.OfType<TLUser>().First(x => x.Id == peer.UserId);
+                        var message = dialogs.Messages.OfType<TLMessage>().FirstOrDefault(x => x.Id == item.TopMessage);
+                        lbUserChats.Items.Add(new UserView(user,message,10));
+                    }
+                }
+
             }
         }
 
@@ -68,6 +76,38 @@ namespace TelegramLight
             await client.ConnectAsync();
 
             hash = await client.SendCodeRequestAsync(TbPhone.Text);
+        }
+
+        private async void lbUserChats_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            rtbMain.SelectAll();
+            rtbMain.Selection.Text = "";
+            var selected = (UserView)lbUserChats.SelectedItem;
+            var peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash??0 };
+            var result = await client.GetHistoryAsync(peer) as TLMessagesSlice;
+            if (result == null) return;
+            foreach (var item in result.Messages.OfType<TLMessage>())
+            {
+                var senderU = result.Users.OfType<TLUser>().FirstOrDefault(x => x.Id == item.FromId);
+                rtbMain.AppendText(new UserView(senderU,item));
+                rtbMain.AppendText(Environment.NewLine);
+            }
+        }
+
+        private async void lbGroupChats_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            rtbMain.SelectAll();
+            rtbMain.Selection.Text = "";
+            var selected = (GroupView)lbGroupChats.SelectedItem;
+            var peer = new TLInputPeerChannel() { ChannelId= selected.id, AccessHash = selected.accessHash ?? 0 };
+            var result = await client.GetHistoryAsync(peer) as TLChannelMessages;
+            if (result == null) return;
+            foreach (var item in result.Messages.OfType<TLMessage>())
+            {
+                var senderU = result.Users.OfType<TLUser>().FirstOrDefault(x => x.Id == item.FromId);
+                rtbMain.AppendText(new UserView(senderU, item));
+                rtbMain.AppendText(Environment.NewLine);
+            }
         }
     }
 }
