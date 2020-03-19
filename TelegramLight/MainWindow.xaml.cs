@@ -29,6 +29,7 @@ namespace TelegramLight
         private static readonly string apiHash = Properties.Resources.API_HASH;
         string hash = "";
         private static readonly TelegramClient client = new TelegramClient(apiId, apiHash);
+        private int currentChatLastMessageId = 0;
         public MainWindow()
         {
             InitializeComponent();
@@ -83,14 +84,8 @@ namespace TelegramLight
             rtbMain.Selection.Text = "";
             var selected = (UserView)lbUserChats.SelectedItem;
             var peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash??0 };
-            var result = await client.GetHistoryAsync(peer) as TLMessagesSlice;
-            if (result == null) return;
-            foreach (var item in result.Messages.OfType<TLMessage>())
-            {
-                var senderU = result.Users.OfType<TLUser>().FirstOrDefault(x => x.Id == item.FromId);
-                rtbMain.AppendText(new UserView(senderU,item));
-                rtbMain.AppendText(Environment.NewLine);
-            }
+            currentChatLastMessageId = 0;
+            await UpdateChat(peer, currentChatLastMessageId);
         }
 
         private async void lbGroupChats_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -99,33 +94,66 @@ namespace TelegramLight
             rtbMain.Selection.Text = "";
             var selected = (GroupView)lbGroupChats.SelectedItem;
             var peer = new TLInputPeerChannel() { ChannelId= selected.id, AccessHash = selected.accessHash ?? 0 };
-            var result = await client.GetHistoryAsync(peer) as TLChannelMessages;
-            if (result == null) return;
-            foreach (var item in result.Messages.OfType<TLMessage>())
-            {
-                var senderU = result.Users.OfType<TLUser>().FirstOrDefault(x => x.Id == item.FromId);
-                rtbMain.AppendText(new UserView(senderU, item));
-                rtbMain.AppendText(Environment.NewLine);
-            }
+
+            await UpdateChat(peer, currentChatLastMessageId);
+
         }
 
         private async void btnSendMessage_Click(object sender, RoutedEventArgs e)
         {
+            await SendMessage();
+        }
+
+        private async void tbMessageToSend_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                await SendMessage();
+            }
+        }
+
+        private async Task SendMessage()
+        {
             string message = tbMessageToSend.Text;
             TLAbsInputPeer peer;
-            if (lbGroupChats.SelectedItem != null)
+            if (string.IsNullOrEmpty(message))
             {
-                var selected = (GroupView)lbGroupChats.SelectedItem;
-                peer = new TLInputPeerChannel() { ChannelId = selected.id, AccessHash = selected.accessHash ?? 0 };
+                //return;
             }
-            else if (lbUserChats.SelectedItem != null)
+            if (lbUserChats.SelectedItem != null)
             {
                 var selected = (UserView)lbUserChats.SelectedItem;
                 peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash ?? 0 };
             }
+            else if (lbGroupChats.SelectedItem != null)
+            {
+                var selected = (GroupView)lbGroupChats.SelectedItem;
+                peer = new TLInputPeerChannel() { ChannelId = selected.id, AccessHash = selected.accessHash ?? 0 };
+            }
             else return;
 
             await client.SendMessageAsync(peer, message);
+            tbMessageToSend.Text = "";
+
+            await UpdateChat(peer, currentChatLastMessageId);
+        }
+
+        private async Task UpdateChat(TLAbsInputPeer peer, int lastMessageId)
+        {
+            var result = TelegramMessages.FromTLMessage(await client.GetHistoryAsync(peer, minId: currentChatLastMessageId));
+            if (result == null)
+            {
+                currentChatLastMessageId = 0;
+                return;
+            }
+            currentChatLastMessageId = result.Messages.OfType<TLMessage>().FirstOrDefault()?.Id ?? 0;
+            foreach (var item in result.Messages.OfType<TLMessage>().Reverse())
+            {
+                var senderU = result.Users.OfType<TLUser>().FirstOrDefault(x => x.Id == item.FromId);
+                rtbMain.AppendText(Environment.NewLine);
+                rtbMain.AppendText(new UserView(senderU, item));               
+            }
+            rtbMain.ScrollToEnd();
         }
     }
 }

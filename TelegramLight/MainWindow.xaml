@@ -7,21 +7,21 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <RichTextBox x:Name="rtbMain" HorizontalAlignment="Left" Height="362" Margin="262,38,0,0" VerticalAlignment="Top" Width="388">
+        <RichTextBox x:Name="rtbMain" HorizontalAlignment="Left" Height="362" Margin="262,10,0,0" VerticalAlignment="Top" Width="388">
             <FlowDocument>
                 <Paragraph>
 
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
-        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Height="32" Margin="650,137,0,0" VerticalAlignment="Top" Width="132" Click="btnStart_Click"/>
-        <TextBox x:Name="TbPhone" HorizontalAlignment="Left" Height="23" Margin="662,21,0,0" TextWrapping="Wrap" Text="+" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="btnSend" Content="Send code" HorizontalAlignment="Left" Height="32" Margin="650,100,0,0" VerticalAlignment="Top" Width="132" Click="btnSend_Click" />
-        <TextBox x:Name="TbCode" HorizontalAlignment="Left" Height="23" Margin="662,72,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Height="32" Margin="154,137,0,0" VerticalAlignment="Top" Width="120" Click="btnStart_Click"/>
+        <TextBox x:Name="TbPhone" HorizontalAlignment="Left" Height="23" Margin="154.2,21,0,0" TextWrapping="Wrap" Text="+" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnSend" Content="Send code" HorizontalAlignment="Left" Height="32" Margin="154,100,0,0" VerticalAlignment="Top" Width="120" Click="btnSend_Click" />
+        <TextBox x:Name="TbCode" HorizontalAlignment="Left" Height="23" Margin="154.2,72,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
         <ListBox x:Name="lbGroupChats" HorizontalAlignment="Left" Height="159" Margin="10,10,0,0" VerticalAlignment="Top" Width="242" SelectionChanged="lbGroupChats_SelectionChanged"/>
         <ListBox x:Name="lbUserChats" HorizontalAlignment="Left" Height="226" Margin="10,174,0,0" VerticalAlignment="Top" Width="247" SelectionChanged="lbUserChats_SelectionChanged"/>
-        <Button x:Name="btnSendMessage" Content="Send" HorizontalAlignment="Left" Margin="575,10,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="btnSendMessage_Click"/>
-        <TextBox x:Name="tbMessageToSend" HorizontalAlignment="Left" Height="23" Margin="262,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="308"/>
+        <Button x:Name="btnSendMessage" Content="Send" HorizontalAlignment="Left" Margin="67,377,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="btnSendMessage_Click"/>
+        <TextBox x:Name="tbMessageToSend" HorizontalAlignment="Left" Height="23" Margin="262,377,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="308" KeyDown="tbMessageToSend_KeyDown" />
 
     </Grid>
 </Window>
