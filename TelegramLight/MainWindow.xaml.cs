@@ -38,24 +38,20 @@ namespace TelegramLight
 
         private async void btnStart_Click(object sender, RoutedEventArgs e)
         {
+            await client.ConnectAsync();
 
             if (!client.IsUserAuthorized())
             {
-                TLUser user = await client.MakeAuthAsync(TbPhone.Text, hash, TbCode.Text);
+                await SignInOrRegister();
             }
-            else
-            {
-                await client.ConnectAsync();
-            }
-
 
             if (client.IsUserAuthorized())
             {
-                
-                var dialogs = (TLDialogsSlice)await client.GetUserDialogsAsync(limit: 30);
+
+                var dialogs = TelegramDialogs.FromTLDialogs(await client.GetUserDialogsAsync(limit: 30));
                 foreach (var item in dialogs.Chats.OfType<TLChannel>())
                 {
-                    lbGroupChats.Items.Add(new GroupView( item));
+                    lbGroupChats.Items.Add(new GroupView(item));
                 }
                 foreach (var item in dialogs.Dialogs)
                 {
@@ -64,18 +60,81 @@ namespace TelegramLight
                     {
                         var user = dialogs.Users.OfType<TLUser>().First(x => x.Id == peer.UserId);
                         var message = dialogs.Messages.OfType<TLMessage>().FirstOrDefault(x => x.Id == item.TopMessage);
-                        lbUserChats.Items.Add(new UserView(user,message,10));
+                        lbUserChats.Items.Add(new UserView(user, message, 10));
                     }
                 }
 
             }
         }
 
+        private async Task SignInOrRegister()
+        {
+            if (TbPhone.Text == "" || TbPhone.Text == "+" || TbCode.Text == "")
+            {
+                rtbOutput.AppendText("Enter phone number and code to authorize");
+                return;
+            }
+
+            try
+            {
+                TLUser user = await client.MakeAuthAsync(TbPhone.Text, hash, TbCode.Text);
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (ex.Message == "PHONE_NUMBER_UNOCCUPIED")
+                {
+                    await RegisterUser();
+                }
+                else
+                {
+                    rtbOutput.AppendText(ex.Message);
+                    rtbOutput.AppendText(Environment.NewLine);
+                }
+            }
+        }
+
+
+        private async Task RegisterUser()
+        {
+            if (TbRegistrationName.Text == "" || TbRegistrationSurname.Text == "")
+            {
+                rtbOutput.AppendText("Enter name and surname to register");
+                rtbOutput.AppendText(Environment.NewLine);
+                return;
+            }
+            try
+            {
+                await client.SignUpAsync(TbPhone.Text, hash, TbCode.Text, TbRegistrationName.Text, TbRegistrationSurname.Text);
+            }
+            catch (InvalidOperationException ex)
+            {
+                rtbOutput.AppendText(ex.Message);
+                rtbOutput.AppendText(Environment.NewLine);
+            }
+        }
+
+
         private async void btnSend_Click(object sender, RoutedEventArgs e)
         {
             await client.ConnectAsync();
 
-            hash = await client.SendCodeRequestAsync(TbPhone.Text);
+            try
+            {
+                hash = await client.SendCodeRequestAsync(TbPhone.Text);
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (ex.Message == "PHONE_NUMBER_INVALID")
+                {
+                    rtbOutput.AppendText("Please, enter valid phone number");
+                    rtbOutput.AppendText(Environment.NewLine);
+                }
+                else
+                {
+                    rtbOutput.AppendText(ex.Message);
+                }
+
+            }
         }
 
         private async void lbUserChats_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -83,7 +142,7 @@ namespace TelegramLight
             rtbMain.SelectAll();
             rtbMain.Selection.Text = "";
             var selected = (UserView)lbUserChats.SelectedItem;
-            var peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash??0 };
+            var peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash ?? 0 };
             currentChatLastMessageId = 0;
             await UpdateChat(peer, currentChatLastMessageId);
         }
@@ -93,7 +152,7 @@ namespace TelegramLight
             rtbMain.SelectAll();
             rtbMain.Selection.Text = "";
             var selected = (GroupView)lbGroupChats.SelectedItem;
-            var peer = new TLInputPeerChannel() { ChannelId= selected.id, AccessHash = selected.accessHash ?? 0 };
+            var peer = new TLInputPeerChannel() { ChannelId = selected.id, AccessHash = selected.accessHash ?? 0 };
 
             await UpdateChat(peer, currentChatLastMessageId);
 
@@ -140,7 +199,7 @@ namespace TelegramLight
 
         private async Task UpdateChat(TLAbsInputPeer peer, int lastMessageId)
         {
-            var result = TelegramMessages.FromTLMessage(await client.GetHistoryAsync(peer, minId: currentChatLastMessageId));
+            var result = TelegramMessages.FromTLMessages(await client.GetHistoryAsync(peer, minId: currentChatLastMessageId));
             if (result == null)
             {
                 currentChatLastMessageId = 0;
@@ -151,7 +210,7 @@ namespace TelegramLight
             {
                 var senderU = result.Users.OfType<TLUser>().FirstOrDefault(x => x.Id == item.FromId);
                 rtbMain.AppendText(Environment.NewLine);
-                rtbMain.AppendText(new UserView(senderU, item));               
+                rtbMain.AppendText(new UserView(senderU, item));
             }
             rtbMain.ScrollToEnd();
         }

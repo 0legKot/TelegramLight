@@ -14,14 +14,22 @@
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
-        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Height="32" Margin="154,137,0,0" VerticalAlignment="Top" Width="120" Click="btnStart_Click"/>
-        <TextBox x:Name="TbPhone" HorizontalAlignment="Left" Height="23" Margin="154.2,21,0,0" TextWrapping="Wrap" Text="+" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="btnSend" Content="Send code" HorizontalAlignment="Left" Height="32" Margin="154,100,0,0" VerticalAlignment="Top" Width="120" Click="btnSend_Click" />
-        <TextBox x:Name="TbCode" HorizontalAlignment="Left" Height="23" Margin="154.2,72,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Height="32" Margin="664,103,0,0" VerticalAlignment="Top" Width="120" Click="btnStart_Click"/>
+        <TextBox x:Name="TbPhone" HorizontalAlignment="Left" Height="23" Margin="664,10,0,0" TextWrapping="Wrap" Text="+" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnSend" Content="Send code" HorizontalAlignment="Left" Height="32" Margin="664,66,0,0" VerticalAlignment="Top" Width="120" Click="btnSend_Click" />
+        <TextBox x:Name="TbCode" HorizontalAlignment="Left" Height="23" Margin="664,38,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
         <ListBox x:Name="lbGroupChats" HorizontalAlignment="Left" Height="159" Margin="10,10,0,0" VerticalAlignment="Top" Width="242" SelectionChanged="lbGroupChats_SelectionChanged"/>
         <ListBox x:Name="lbUserChats" HorizontalAlignment="Left" Height="226" Margin="10,174,0,0" VerticalAlignment="Top" Width="247" SelectionChanged="lbUserChats_SelectionChanged"/>
-        <Button x:Name="btnSendMessage" Content="Send" HorizontalAlignment="Left" Margin="67,377,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="btnSendMessage_Click"/>
+        <Button x:Name="btnSendMessage" Content="Send" HorizontalAlignment="Left" Margin="575,377,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="btnSendMessage_Click"/>
         <TextBox x:Name="tbMessageToSend" HorizontalAlignment="Left" Height="23" Margin="262,377,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="308" KeyDown="tbMessageToSend_KeyDown" />
+        <TextBox x:Name="TbRegistrationName" HorizontalAlignment="Left" Height="23" Margin="664,146,0,0" TextWrapping="Wrap" Text="name" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="TbRegistrationSurname" HorizontalAlignment="Left" Height="23" Margin="664,174,0,0" TextWrapping="Wrap" Text="surname" VerticalAlignment="Top" Width="120"/>
+        <RichTextBox x:Name="rtbOutput" HorizontalAlignment="Left" Height="198" Margin="664,202,-0.4,0" VerticalAlignment="Top" Width="130">
+            <FlowDocument>
+                <Paragraph>
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
 
     </Grid>
 </Window>

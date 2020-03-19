@@ -9,14 +9,12 @@ using TeleSharp.TL.Messages;
 
 namespace TelegramLight
 {
-    class TelegramMessages : TLAbsMessages
+    class TelegramMessages
     {
         public int Count { get; set; }
         public TLVector<TLAbsMessage> Messages { get; set; }
         public TLVector<TLAbsChat> Chats { get; set; }
         public TLVector<TLAbsUser> Users { get; set; }
-
-        public override int Constructor => throw new NotImplementedException();
 
         public TelegramMessages(TLMessages messages)
         {
@@ -42,7 +40,7 @@ namespace TelegramLight
             Count = messages.Count;
         }
 
-        public static TelegramMessages FromTLMessage(TLAbsMessages absMessages)
+        public static TelegramMessages FromTLMessages(TLAbsMessages absMessages)
         {
             if (absMessages is TLMessages messages)
             {
@@ -77,14 +75,6 @@ namespace TelegramLight
             return new TelegramMessages(messages);
         }
 
-        public override void SerializeBody(BinaryWriter bw)
-        {
-            throw new NotImplementedException();
-        }
 
-        public override void DeserializeBody(BinaryReader br)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
