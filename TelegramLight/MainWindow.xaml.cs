@@ -30,6 +30,7 @@ namespace TelegramLight
         string hash = "";
         private static readonly TelegramClient client = new TelegramClient(apiId, apiHash);
         private int currentChatLastMessageId = 0;
+        private TLAbsInputPeer currentPeer;
         public MainWindow()
         {
             InitializeComponent();
@@ -52,6 +53,10 @@ namespace TelegramLight
                 foreach (var item in dialogs.Chats.OfType<TLChannel>())
                 {
                     lbGroupChats.Items.Add(new GroupView(item));
+                }
+                foreach (var item in dialogs.Chats.OfType<TLChat>())
+                {
+                    lbChatChats.Items.Add(new GroupView(item));
                 }
                 foreach (var item in dialogs.Dialogs)
                 {
@@ -137,31 +142,73 @@ namespace TelegramLight
             }
         }
 
-        private async void lbUserChats_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void lbUserChats_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (lbUserChats.SelectedItem == null)
+            {
+                return;
+            }
+            await UpdateUserChat();
+        }
+
+        private async Task UpdateUserChat()
         {
             rtbMain.SelectAll();
             rtbMain.Selection.Text = "";
             var selected = (UserView)lbUserChats.SelectedItem;
             var peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash ?? 0 };
+            currentPeer = peer;
             currentChatLastMessageId = 0;
             await UpdateChat(peer, currentChatLastMessageId);
         }
 
-        private async void lbGroupChats_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void lbGroupChats_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (lbGroupChats.SelectedItem == null)
+            {
+                return;
+            }
+            await UpdateGroupChat();
+        }
+
+        private async Task UpdateGroupChat()
         {
             rtbMain.SelectAll();
             rtbMain.Selection.Text = "";
             var selected = (GroupView)lbGroupChats.SelectedItem;
             var peer = new TLInputPeerChannel() { ChannelId = selected.id, AccessHash = selected.accessHash ?? 0 };
-
+            currentPeer = peer;
+            currentChatLastMessageId = 0;
             await UpdateChat(peer, currentChatLastMessageId);
+        }
 
+
+        private async void lbChatChats_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (lbChatChats.SelectedItem == null)
+            {
+                return;
+            }
+            await UpdateChatChats();
+        }
+
+        private async Task UpdateChatChats()
+        {
+            rtbMain.SelectAll();
+            rtbMain.Selection.Text = "";
+            var selected = (GroupView)lbChatChats.SelectedItem;
+            var peer = new TLInputPeerChat() { ChatId = selected.id };
+            currentPeer = peer;
+            currentChatLastMessageId = 0;
+            await UpdateChat(peer, currentChatLastMessageId);
         }
 
         private async void btnSendMessage_Click(object sender, RoutedEventArgs e)
         {
             await SendMessage();
         }
+
+
 
         private async void tbMessageToSend_KeyDown(object sender, KeyEventArgs e)
         {
@@ -174,22 +221,28 @@ namespace TelegramLight
         private async Task SendMessage()
         {
             string message = tbMessageToSend.Text;
-            TLAbsInputPeer peer;
             if (string.IsNullOrEmpty(message))
             {
-                //return;
+                return;
             }
-            if (lbUserChats.SelectedItem != null)
-            {
-                var selected = (UserView)lbUserChats.SelectedItem;
-                peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash ?? 0 };
-            }
-            else if (lbGroupChats.SelectedItem != null)
-            {
-                var selected = (GroupView)lbGroupChats.SelectedItem;
-                peer = new TLInputPeerChannel() { ChannelId = selected.id, AccessHash = selected.accessHash ?? 0 };
-            }
-            else return;
+            TLAbsInputPeer peer = currentPeer;
+
+            //if (lbUserChats.SelectedItem != null)
+            //{
+            //    var selected = (UserView)lbUserChats.SelectedItem;
+            //    peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash ?? 0 };
+            //}
+            //else if (lbChatChats.SelectedItem != null)
+            //{
+            //    var selected = (GroupView)lbChatChats.SelectedItem;
+            //    peer = new TLInputPeerChat() { ChatId = selected.id };
+            //}
+            //else if (lbGroupChats.SelectedItem != null)
+            //{
+            //    var selected = (GroupView)lbGroupChats.SelectedItem;
+            //    peer = new TLInputPeerChannel() { ChannelId = selected.id, AccessHash = selected.accessHash ?? 0 };
+            //}
+            //else return;
 
             await client.SendMessageAsync(peer, message);
             tbMessageToSend.Text = "";
@@ -199,7 +252,35 @@ namespace TelegramLight
 
         private async Task UpdateChat(TLAbsInputPeer peer, int lastMessageId)
         {
-            var result = TelegramMessages.FromTLMessages(await client.GetHistoryAsync(peer, minId: currentChatLastMessageId));
+            TLAbsMessages history = null;
+            //int retries = 5;
+            //for (int i = 0; i < retries; ++i)
+            //{
+            //    try
+            //    {
+            //        history = await client.GetHistoryAsync(peer, minId: currentChatLastMessageId);
+            //        break;
+            //    }
+            //    catch (IOException)
+            //    {
+            //        await client.ConnectAsync(true);
+            //        if (i == retries - 1)
+            //        {
+            //            throw;
+            //        }
+            //    }
+            //    catch (InvalidOperationException ex)
+            //    {
+            //        if (ex.Message == "Couldn't read the packet length")
+            //        {
+            //            await client.ConnectAsync(true);
+            //        }
+            //        else throw;
+            //    }
+            //}
+
+            history = await client.GetHistoryAsync(peer, minId: currentChatLastMessageId);
+            var result = TelegramMessages.FromTLMessages(history);
             if (result == null)
             {
                 currentChatLastMessageId = 0;
@@ -214,5 +295,7 @@ namespace TelegramLight
             }
             rtbMain.ScrollToEnd();
         }
+
+
     }
 }

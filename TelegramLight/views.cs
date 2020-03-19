@@ -42,8 +42,14 @@ namespace TelegramLight
             id = group.Id;
             accessHash = group.AccessHash;
             text = group.Title;
-
         }
+
+        public GroupView(TLChat chat)
+        {
+            id = chat.Id;
+            text = chat.Title;
+        }
+
         public static implicit operator string(GroupView x)
         {
             return x.ToString();

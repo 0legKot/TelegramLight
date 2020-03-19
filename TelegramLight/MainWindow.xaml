@@ -18,8 +18,9 @@
         <TextBox x:Name="TbPhone" HorizontalAlignment="Left" Height="23" Margin="664,10,0,0" TextWrapping="Wrap" Text="+" VerticalAlignment="Top" Width="120"/>
         <Button x:Name="btnSend" Content="Send code" HorizontalAlignment="Left" Height="32" Margin="664,66,0,0" VerticalAlignment="Top" Width="120" Click="btnSend_Click" />
         <TextBox x:Name="TbCode" HorizontalAlignment="Left" Height="23" Margin="664,38,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-        <ListBox x:Name="lbGroupChats" HorizontalAlignment="Left" Height="159" Margin="10,10,0,0" VerticalAlignment="Top" Width="242" SelectionChanged="lbGroupChats_SelectionChanged"/>
-        <ListBox x:Name="lbUserChats" HorizontalAlignment="Left" Height="226" Margin="10,174,0,0" VerticalAlignment="Top" Width="247" SelectionChanged="lbUserChats_SelectionChanged"/>
+        <ListBox x:Name="lbGroupChats" HorizontalAlignment="Left" Height="88" Margin="10,10,0,0" VerticalAlignment="Top" Width="242" MouseLeftButtonUp="lbGroupChats_MouseLeftButtonUp"/>
+        <ListBox x:Name="lbChatChats" HorizontalAlignment="Left" Height="94" Margin="10,103,0,0" VerticalAlignment="Top" Width="242" MouseLeftButtonUp="lbChatChats_MouseLeftButtonUp"/>
+        <ListBox x:Name="lbUserChats" HorizontalAlignment="Left" Height="198" Margin="10,202,0,0" VerticalAlignment="Top" Width="247" MouseLeftButtonUp="lbUserChats_MouseLeftButtonUp"/>
         <Button x:Name="btnSendMessage" Content="Send" HorizontalAlignment="Left" Margin="575,377,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="btnSendMessage_Click"/>
         <TextBox x:Name="tbMessageToSend" HorizontalAlignment="Left" Height="23" Margin="262,377,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="308" KeyDown="tbMessageToSend_KeyDown" />
         <TextBox x:Name="TbRegistrationName" HorizontalAlignment="Left" Height="23" Margin="664,146,0,0" TextWrapping="Wrap" Text="name" VerticalAlignment="Top" Width="120"/>
