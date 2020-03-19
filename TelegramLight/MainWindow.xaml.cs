@@ -54,7 +54,6 @@ namespace TelegramLight
                 var dialogs = (TLDialogsSlice)await client.GetUserDialogsAsync(limit: 30);
                 foreach (var item in dialogs.Chats.OfType<TLChannel>())
                 {
-
                     lbGroupChats.Items.Add(new GroupView( item));
                 }
                 foreach (var item in dialogs.Dialogs)
@@ -108,6 +107,25 @@ namespace TelegramLight
                 rtbMain.AppendText(new UserView(senderU, item));
                 rtbMain.AppendText(Environment.NewLine);
             }
+        }
+
+        private async void btnSendMessage_Click(object sender, RoutedEventArgs e)
+        {
+            string message = tbMessageToSend.Text;
+            TLAbsInputPeer peer;
+            if (lbGroupChats.SelectedItem != null)
+            {
+                var selected = (GroupView)lbGroupChats.SelectedItem;
+                peer = new TLInputPeerChannel() { ChannelId = selected.id, AccessHash = selected.accessHash ?? 0 };
+            }
+            else if (lbUserChats.SelectedItem != null)
+            {
+                var selected = (UserView)lbUserChats.SelectedItem;
+                peer = new TLInputPeerUser() { UserId = selected.id, AccessHash = selected.accessHash ?? 0 };
+            }
+            else return;
+
+            await client.SendMessageAsync(peer, message);
         }
     }
 }
